@@ -1,0 +1,372 @@
+#include "libr.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <Windows.h>
+#pragma warning(disable:4996) 
+struct booklist { //책 등록에 필요한 작가,제목,출판사를 묶어놓은 구조체
+	char writer[50];
+	char title[150];
+	char publish[50];
+};
+
+struct search //유용한 검색을 위해 만들어놓은 규조체
+{
+	char component[150];
+};
+
+struct save_user //id.txt에 저장된 사용자를 찾기 위한 구조체
+{
+	char s_user[100];
+};
+
+
+typedef struct riturn riturn;
+typedef struct booklist list;
+typedef struct search sarch;
+typedef struct save_user save_user;
+
+
+void admn(int* n) //관리자 전용 메뉴.
+{
+	printf("========================================================\n");
+	printf("1.유저 명단 2.책 목록 3.책 추가 4.유저별 책 목록 5.exit\n");
+	printf("메뉴 입력:");
+	scanf("%d", n);
+	getchar();
+	if (*n == 1) //가입자 명단
+	{
+		char* us2r;
+		us2r = (char*)malloc(sizeof(us2r) * 100);
+		FILE* u1;
+		u1 = fopen("id.txt", "r");
+		printf("가입 명단:\n");
+		while (1)
+		{
+			fgets(us2r, 100, u1);
+			if (feof(u1))
+			{
+				break;
+			}
+			printf("%s", us2r);
+		}
+		fclose(u1);
+		free(us2r);
+	}
+	if (*n == 2) //등록된 책 목록
+	{
+		char* b1;
+		b1 = (char*)malloc(sizeof(char) * 300);
+		FILE* u2;
+		u2 = fopen("C:\\book\\booklist.txt", "r");
+		if (u2 == NULL)
+		{
+			fprintf(stderr, "등록된 책이 아직 없습니다.\n");
+		}
+		else
+		{
+			printf("책 목록:\n");
+			while (1)
+			{
+
+				fgets(b1, 100, u2);
+				if (feof(u2))
+				{
+					break;
+				}
+				printf("%s\n", b1);
+			}
+			fclose(u2);
+		}
+		free(b1);
+	}
+	if (*n == 3) //책 등록
+	{
+		list* book;
+		book = (list*)malloc(sizeof(list));
+		char* addr;
+		addr = (char*)malloc(sizeof(char) * 120);
+		strcpy(addr, "C:\\book\\");
+		FILE* u3;
+		u3 = fopen("C:\\book\\booklist.txt", "a");
+		fseek(u3, SEEK_END, SEEK_SET);
+		printf("저자:");
+		gets(book->writer);
+		printf("제목:");
+		gets(book->title);
+		printf("출판사:");
+		gets(book->publish);
+		fprintf(u3, "writ:%s,book:%s,publ:%s\n", book->writer, book->title, book->publish);
+		fclose(u3);
+		strcat(addr, book->title);
+		strcat(addr, "_");
+		strcat(addr, book->publish);
+		strcat(addr, ".txt");
+		FILE* u4;
+		u4 = fopen(addr, "w");
+		fprintf(u4, "12");
+		fclose(u4);
+		free(book);
+		free(addr);
+	}
+	if (*n == 5)
+	{
+		printf("시스템 종료.");
+	}
+	if (*n == 4) //유저별 도서목록
+	{
+		char* susr;
+		susr = (char*)malloc(sizeof(susr) * 100);
+		FILE* fm;
+		fm = fopen("id.txt", "r");
+		while (1) {
+			fgets(susr, 100, fm);
+			if (feof(fm)) 
+			{
+				break;
+			}
+			susr[strlen(susr) - 1] = '\0';
+			user_book(susr);
+		}
+		fclose(fm);
+		free(susr);
+	}
+}
+
+void borrow_menu(char usr[]) //책 등록에 베이스 페이지.
+{
+	char* bookusr;
+	char* book;
+	char* id;
+	char* publ;
+	char* py_usr;
+	char* address;
+	char* cp_book;
+	bookusr = (char*)malloc(sizeof(char) * 100);
+	book = (char*)malloc(sizeof(char) * 90);
+	cp_book = (char*)malloc(sizeof(char) * 60);
+	id = (char*)malloc(sizeof(char) * 50);
+	publ = (char*)malloc(sizeof(char) * 40);
+	py_usr = (char*)malloc(sizeof(char) * 50);
+	address = (char*)malloc(sizeof(char) * 120);
+	strcpy(bookusr, "C:\\bookuser\\");
+	strcat(bookusr, usr);
+	strcat(bookusr, ".txt");
+	FILE* bsr;
+	bsr = fopen(bookusr, "r");
+	if (bsr == NULL) 
+	{
+		bsr = fopen(bookusr, "w");
+		fclose(bsr);
+	}
+	else 
+	{
+		fclose(bsr);
+	}
+	strcpy(address, "C:\\book\\");
+	strcpy(py_usr, usr);
+	p_cpy(py_usr);
+	printf("대출/반납 하고자 하는 책 이름을 입력하세요:");
+	gets(book);
+	strcpy(cp_book, book);
+	printf("책의 출판사를 입력하세요.");
+	gets(publ);
+	strcat(book, "_");
+	strcat(book, publ);
+	strcat(book,".txt");
+	strcat(address, book);
+	FILE* fa;
+	fa = fopen(address, "r");
+	if (fa == NULL) 
+	{
+		fprintf(stderr, "등록되지 않은 책입니다.\n");
+	}
+	else 
+	{
+		fgets(id, 50, fa);
+		fclose(fa);
+		if (strcmp(id,"12")==0)
+		{
+			if (check_book(bookusr) < 2) 
+			{
+				printf("책을 빌리시겠습니까?(Y/N)\n");
+				char a;
+				scanf("%c", &a);
+				getchar();
+				if (a == 'Y' || a == 'y')
+				{
+					borrow_book(py_usr, address);
+					b_book(cp_book, bookusr);
+
+				}
+				else 
+				{
+					for (int i = 0; i < 3; i++) 
+					{
+						printf(".");
+						Sleep(10);
+					}
+					printf(".\n");
+				}
+			}
+			else 
+			{
+				printf("이미 2권을 빌린 상태입니다.\n");
+			}
+			
+		}
+		else 
+		{
+			if (strcmp(id,py_usr) == 0)
+			{
+				printf("책을 반납하시겠습니까?(Y/N)\n");
+				char b;
+				scanf("%c", &b);
+				getchar();
+				if (b == 'Y' || b == 'y')
+				{
+					return_book(address);
+					if (check_book(bookusr) == 1) 
+					{
+						FILE* rbo;
+						rbo = fopen(bookusr, "w");
+						fclose(rbo);
+					}
+					else if (check_book(bookusr) == 2) 
+					{
+						FILE* rbt;
+						char* rbuk;
+						rbuk = (char*)malloc(sizeof(char) * 100);
+						strcat(cp_book, "\n");
+						rbt = fopen(bookusr, "r");
+						while (1) 
+						{
+							fgets(rbuk, 100, rbt);
+							if (feof(rbt)) 
+							{
+								break;
+							}
+							if (strcmp(rbuk, cp_book)!=0) 
+							{
+								break;
+							}
+						}
+						fclose(rbt);
+						FILE* rbtt;
+						rbtt = fopen(bookusr, "w");
+						fprintf(rbtt, "%s", rbuk);
+						fclose(rbtt);
+						free(rbuk);
+					}
+				}
+				else 
+				{
+					for (int i = 0; i < 3; i++) 
+					{
+						printf(".");
+						Sleep(10);
+					}
+					printf(".\n");
+				}
+			}
+			else 
+			{
+				printf("누군가가 책을 대여중입니다.\n");
+			}
+		}
+	}
+	free(book);
+	free(id);
+	free(publ);
+	free(py_usr);
+	free(address);
+	free(bookusr);
+	free(cp_book);
+}
+
+void borrow_book(char p_id[], char f1le[]) //borrow_menu 중 책 대여
+{
+	FILE* ma;
+	ma = fopen(f1le, "w");
+	fprintf(ma, "%s", p_id);
+	fclose(ma);
+	printf("대여가 완료되었습니다.\n");
+}
+
+void return_book(char f1le[]) //borrow_menu 중 책 반납
+{
+	FILE* mb;
+	mb = fopen(f1le, "w");
+	fprintf(mb, "12");
+	fclose(mb);
+	printf("반납이 완료되었습니다.\n");
+}
+
+void index_book() //원하는 책 찾기 menu_1.c, 40번째 줄
+{
+	int menu;
+	char* seach;
+	seach = (char*)malloc(sizeof(char)*150);
+	char* input;
+	input = (char*)malloc(sizeof(char) * 50);
+	printf("1.제목 2.저자 3.출판사:");
+	scanf("%d", &menu);
+	getchar();
+	if (menu == 1) 
+	{
+		strcpy(seach, "book:");
+	}
+	else if (menu == 2)
+	{
+		strcpy(seach, "writ:");
+	}
+	else if (menu == 3)
+	{
+		strcpy(seach, "publ:");
+	}
+	printf("검색(최대 20개의 결과가 노출됩니다.):");
+	gets(input);
+	strcat(seach, input);
+	free(input);
+	int result = 0;
+	sarch* list;
+	list = (sarch*)malloc(sizeof(sarch) * 20);
+	char* fgats;
+	fgats = (char*)malloc(sizeof(char) * 150);
+	FILE* cf;
+	cf = fopen("C:\\book\\booklist.txt", "r");
+	if (cf == NULL) 
+	{
+		printf("파일을 열 수 없습니다.");
+		exit(1);
+	}
+	while (1) 
+	{
+		fgets(fgats, 150, cf);
+		if (feof(cf)) 
+		{
+			printf("탐색이 완료되었습니다.\n");
+			break;
+		}
+		if (strstr(fgats, seach))
+		{
+			strcpy(list[result].component, fgats);
+			result++;
+		}
+	}
+	fclose(cf);
+	free(fgats);
+	if (result != 0) 
+	{
+		printf("%d권의 책이 발견되었습니다.\n", result);
+		for (int i = 0; i < result; i++) 
+		{
+			printf("%s\n", list[i].component);
+		}
+	}
+	else {
+		printf("검색 결과가 없습니다.\n");
+	}
+	free(seach);
+}
