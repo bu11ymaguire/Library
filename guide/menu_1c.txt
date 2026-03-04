@@ -1,0 +1,48 @@
+#include "libr.h"
+#include <stdio.h>
+#include <string.h>
+#pragma warning(disable:4996) 
+
+void menu(int *n)
+{
+	printf("========================================\n");
+	printf("1.Register 2.Log_in 3. FIND BOOKS 4.exit \n");
+	printf("메뉴 입력:");
+	scanf("%d", n);
+	getchar();
+	if (*n == 1) 
+	{
+		regist();
+	}
+	else if (*n == 2)
+	{
+		printf("TBD\n");
+	}
+	else if (*n == 3)
+	{
+		printf("TBD\n");
+	}
+	else if (*n == 4)
+	{
+		printf("이용해 주셔서 감사합니다.");
+	}
+}
+
+void regist()
+{
+	char id1[100];
+	char pw[25];
+	printf("ID를 입력해주세요.");
+	gets(id1);
+	getchar();
+	FILE* fp;
+	fp = fopen("id.txt", "a");
+	char test[100];
+	int dup = 0;
+	while (!feof(fp))
+	{
+		fgets(test, 100, fp);
+		printf("%s", test);
+	}
+	fclose(fp);
+}

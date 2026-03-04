@@ -1,0 +1,20 @@
+#include <stdio.h>
+#include "libr.h"
+#include <string.h>
+#pragma warning(disable:4996) 
+
+int main() 
+{
+	printf("<<도서관>>\n");
+	char username[100];
+	int m;
+	for (;;) 
+	{
+		menu(&m);
+		if (m == 4) 
+		{
+			break;
+		}
+	}
+	return 0;
+}

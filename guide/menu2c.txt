@@ -1,0 +1,167 @@
+#include "libr.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <conio.h>
+#pragma warning(disable:4996) 
+
+void login(char usr[])//로그인 
+{
+	char* lid;
+	lid = (char*)malloc(sizeof(char) * 100);
+	char* lpw;
+	lpw = (char*)malloc(sizeof(char) * 25);
+	char* Fi1e;
+	Fi1e = (char*)malloc(sizeof(char) * 100);
+	char* info;
+	info = (char*)malloc(sizeof(char) * 100);
+	int result=100;
+	printf("ID:");
+	gets(lid);
+	strcpy(Fi1e, "C:\\id\\");
+	strcat(Fi1e, lid);
+	strcat(Fi1e, ".txt");
+	printf("PW:");
+	p_star(lpw);
+	FILE* fp;
+	fp = fopen(Fi1e, "r");
+	printf("확인중.\n");
+	if (fp == NULL) 
+	{
+		fprintf(stderr,"%s로 된 계정을 찾지 못하였습니다.\n", lid);
+	}
+	else 
+	{
+		while (1)
+		{
+			if (feof(fp))
+			{
+				fclose(fp);
+				break;
+			}
+			fgets(info, 140, fp);
+			result = strcmp(info, lpw);
+			if (result == 0)
+			{
+				strcpy(usr, lid);
+				printf("%s님,환영합니다.\n", usr);
+				fclose(fp);
+				break;
+			}
+			
+		}
+		if (result != 0)
+		{
+			find_id(lid);
+		}
+	}
+	free(lpw);
+	free(lid);
+	free(Fi1e);
+	free(info);
+}
+
+void find_id(char id[]) //id 가입여부 판별.
+{
+	FILE* fp;
+	fp = fopen("id.txt", "r");
+	char* t2t;
+	t2t = (char*)malloc(sizeof(t2t) * 100);
+	char* cfim;
+	cfim = (char*)malloc(sizeof(cfim) * 25);
+	int result=100;
+	strcpy(cfim, id);
+	strcat(cfim, "\n");
+	while (1) 
+	{
+		if (feof(fp)) 
+		{
+			printf("%s로 된 계정을 찾지 못하였습니다. 철자를 확인하거나 새로 가입해주세요.\n", id);
+			fclose(fp);
+			break;
+		}
+		fgets(t2t, 100, fp);
+		result = strcmp(cfim, t2t);
+		if (result == 0) 
+		{
+			printf("비밀번호가 잘못 되었습니다.비밀 번호를 찾으시려면 Y(y)를 입력해주세요.:");
+			char y;
+			scanf("%c", &y);
+			getchar();
+			if (y == 'y' || y == 'Y') 
+			{
+				not_robot();
+				find_p(id);
+			}
+			else
+			{
+				printf("다시 로그인을 시도해주세요.\n");
+			}
+			fclose(fp);
+			break;
+		}
+	}
+	free(cfim);
+	free(t2t);
+}
+
+void bckup(char ID[],char p[])  //비밀번호 찾기를 위한 생년월일 등록.
+{
+	char* birth;
+	birth = (char*)malloc(sizeof(char) * 20);
+	char* tfile;
+	tfile = (char*)malloc(sizeof(char) * 140);
+	printf("비밀번호 분실에 대비하여 생년월일 6자리를 입력해주세요.(ex:2001년 1월 1일 ->010101):");
+	gets(birth);
+	strcpy(tfile, "C:\\pw\\");
+	strcat(tfile, ID);
+	strcat(tfile, "-");
+	strcat(tfile, birth);
+	strcat(tfile, ".txt");
+	FILE* bp;
+	bp = fopen(tfile, "w");
+	fprintf(bp, "%s", p);
+	fclose(bp);
+	free(birth);
+	free(tfile);
+	printf("비밀번호 백업이 완료되었습니다.\n");
+}
+
+void find_p(char iD[]) //아이디와 생년월일을 통한 비밀번호 찾기
+{
+	char* pbirth;
+	char* thepass;
+	char* thefile;
+	pbirth = (char*)malloc(sizeof(char) * 20);
+	thepass = (char*)malloc(sizeof(char) * 30);
+	thefile = (char*)malloc(sizeof(char) * 100);
+	printf("생년월일 6자리를 입력해주세요.(ex:2001년 1월 1일 ->010101):");
+	star(pbirth);
+	strcpy(thefile, "C:\\pw\\");
+	strcat(thefile, iD);
+	strcat(thefile, "-");
+	strcat(thefile, pbirth);
+	strcat(thefile, ".txt");
+	FILE* eqeqr;
+	eqeqr = fopen(thefile, "r");
+	if (eqeqr == NULL) 
+	{
+		fprintf(stderr, "잘못된 정보입니다.\n");
+	}
+	else 
+	{
+		while (1) 
+		{
+			if (feof(eqeqr)) 
+			{
+				break;
+			}
+			fgets(thepass, 30, eqeqr);
+			printf("id:%s,pw:%s\n", iD, thepass);
+		}
+		fclose(eqeqr);
+	}
+	free(pbirth);
+	free(thepass);
+	free(thefile);
+}

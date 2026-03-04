@@ -1,0 +1,296 @@
+#include "libr.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <conio.h>
+#pragma warning(disable:4996) 
+struct rule {
+	char admin[6];
+};
+
+typedef struct rule Rule;
+
+void menu(int* n,char user[]) //메인 메뉴
+{
+	if (strcmp(user, "Admin")==0) 
+	{
+		admn(n);
+	}
+	else if (strcmp(user, "User") != 0 && strcmp(user, "Admin") != 0)
+	{
+		log_menu(n, user);
+	}
+	else 
+	{
+		printf("========================================\n");
+		printf("1.Register 2.Log_in 3. FIND BOOKS 4.exit \n");
+		printf("메뉴 입력:");
+		scanf("%d", n);
+		getchar();
+		if (*n == 1)
+		{
+			regist();
+		}
+		else if (*n == 2)
+		{
+			login(user);
+		}
+		else if (*n == 3)
+		{
+			index_book();
+		}
+		else if (*n == 4)
+		{
+			printf("이용해 주셔서 감사합니다.");
+		}
+		else if (*n == 65 || *n == 97)
+		{
+			strcpy(user, "Admin");
+		}
+		else 
+		{
+			printf("잘못된 값입니다.\n");
+		}
+	}
+}
+
+void regist() //회원가입
+{
+	char* id1;
+	char* pword;
+	char* id2;
+	char* txtfile;
+	char* cp_pword;
+	id1 = (char*)malloc(sizeof(char) * 100);
+	pword = (char*)malloc(sizeof(char) * 25);
+	id2 = (char*)malloc(sizeof(char) * 100);
+	txtfile = (char*)malloc(sizeof(char) * 100);
+	cp_pword = (char*)malloc(sizeof(char) * 25);
+	not_robot();
+	printf("ID를 입력해주세요.");
+	gets(id1);
+	strcpy(id2, id1);
+	strcat(id1, "\n");
+	FILE* fp;
+	FILE* ft;
+	fp = fopen("id.txt", "r");
+	char tst[100];
+	int dup = 0;
+	int N = 0;
+	while (1)
+	{
+		if (feof(fp))
+		{
+			break;
+		}
+		fgets(tst, 100, fp);
+
+		int result = strcmp(tst, id1);
+		if (result == 0)
+		{
+			printf("이미 가입된 ID입니다. PW찾기를 하시거나 다른 아이디로 가입해주세요.\n");
+			dup = 1;
+			break;
+		}
+	}
+	fclose(fp);
+	id_rule(id1, &dup);
+	while (dup != 1)
+	{
+		fp = fopen("id.txt", "a");
+		fseek(fp, SEEK_END, SEEK_SET);
+		fprintf(fp, "%s", id1);
+		fclose(fp);
+		printf("id 등록이 완료되었습니다. 패스워드를 설정해주세요.\n");
+		pw(pword);
+		strcpy(cp_pword, pword);
+		p_cpy(cp_pword);
+		strcpy(txtfile, "C:\\id\\");
+		strcat(txtfile, id2);
+		strcat(txtfile, ".txt");
+		ft = fopen(txtfile, "w");
+		if (ft == NULL)
+		{
+			fprintf(stderr, "파일을 열 수 없습니다.\n");
+			exit(1);
+		}
+		fprintf(ft, "%s", cp_pword);
+		fclose(ft);
+		printf("%s님,회원가입이 완료되었습니다.\n", id2);
+		bckup(id2, pword);
+		dup = 1;
+	}
+	free(id1);
+	free(id2);
+	free(pword);
+	free(txtfile);
+	free(cp_pword);
+}
+
+void pw(char pw[]) //패스워드 생성
+{
+	int n;
+	char* pconfirm;
+	pconfirm = (char*)malloc(sizeof(char) * 25);
+	char* makep;
+	makep = (char*)malloc(sizeof(char) * 25);
+	int result = 100;
+	for(n=0;;n++)
+	{
+		int secure = 0;
+		if (n == 0)
+		{
+			printf("비밀번호를 입력해주세요.(비밀번호는 8자 이상,숫자와 알파벳이 포함되어야 합니다.):");
+		}
+		else if (n != 0)
+		{
+			printf("비밀번호는 8자 이상,숫자와 알파벳이 포함되어야 합니다.:");
+		}
+		star(makep);
+		if (strlen(makep) >= 8)
+		{
+			secure += 1;
+		}
+		for (int i = 0; i < strlen(makep); i++)
+		{
+			if ((makep[i] >= 'a' && makep[i] <= 'z') || (pw[i] >= 'A' && makep[i] <= 'Z'))
+			{
+				secure += 1;
+				break;
+			}
+		}
+		for (int j = 0; j < strlen(makep); j++)
+		{
+			if (makep[j] >= '0' && makep[j] <= '9')
+			{
+				secure += 1;
+				break;
+			}
+		}
+		if (secure == 3) {
+			strcpy(pw, makep);
+			break;
+		}
+	}
+	while (result != 0)
+	{
+		printf("조건이 충족되었습니다.확인을 위해 비밀번호를 다시 한 번 입력해주세요.");
+		star(pconfirm);
+		result = strcmp(pw, pconfirm);
+	}
+	printf("확인되었습니다.\n");
+}
+
+void log_menu(int* n, char user[]) //사용자 메뉴
+{
+	printf("==================================================================\n");
+	printf("1.log out, 2.pword change 3.borrow books 4.Now Borrowing 5.Exit \n");
+	scanf("%d", n);
+	getchar();
+	if (*n == 1)
+	{
+		strcpy(user, "User");
+		printf("로그아웃 되었습니다.\n");
+	}
+	else if (*n == 2)
+	{
+		p_change(user);
+	}
+	else if (*n == 3)
+	{
+		borrow_menu(user);
+	}
+	else if (*n == 5) {
+		printf("사용을 종료합니다.\n");
+	}
+	else if (*n == 4) {
+		user_book(user);
+	}
+	else  {
+		printf("잘못된 값입니다.\n");
+	}
+}
+
+void id_rule(char Ld[], int* dp) //id 생성 규칙 -> admin. user 단어 포함X
+{
+	Rule* rule;
+	rule = (Rule*)malloc(64*sizeof(Rule));
+	if (rule == NULL) {
+		printf("메모리 할당오류. \n");
+		exit(1);
+	}
+	strcpy(rule[0].admin, "admin");
+	strcpy(rule[1].admin, "Admin");
+	strcpy(rule[2].admin, "aDmin");
+	strcpy(rule[3].admin, "adMin");
+	strcpy(rule[4].admin, "admIn");
+	strcpy(rule[32].admin, "admln");// 소문자 L,헷갈림 방지
+	strcpy(rule[5].admin, "admiN");
+	strcpy(rule[6].admin, "aDMIN");
+	strcpy(rule[33].admin, "aDMlN");//헷갈림 방지
+	strcpy(rule[7].admin, "AdMIN");
+	strcpy(rule[34].admin, "AdMlN");//헷갈림 방지
+	strcpy(rule[8].admin, "ADmIN");
+	strcpy(rule[35].admin,"ADmlN");//헷갈림 방지
+	strcpy(rule[9].admin,"ADMiN");
+	strcpy(rule[10].admin, "ADMIn");
+	strcpy(rule[36].admin, "ADMln");//헷갈림 방지
+	strcpy(rule[11].admin, "ADmin");
+	strcpy(rule[12].admin, "AdMin");
+	strcpy(rule[13].admin, "AdmIn");
+	strcpy(rule[37].admin, "Admln");
+	strcpy(rule[14].admin, "AdmiN");
+	strcpy(rule[15].admin, "aDMin");
+	strcpy(rule[16].admin, "aDmIn");
+	strcpy(rule[38].admin, "aDmln");//헷갈림 방지
+	strcpy(rule[17].admin, "aDmiN");
+	strcpy(rule[18].admin, "adMIn");
+	strcpy(rule[39].admin, "adMln");//헷갈림 방지
+	strcpy(rule[19].admin, "adMiN");
+	strcpy(rule[20].admin, "admIN");
+	strcpy(rule[40].admin, "admlN");
+	strcpy(rule[21].admin, "adMIN");
+	strcpy(rule[41].admin, "adMlN");//헷갈림 방지
+	strcpy(rule[22].admin, "aDmIN");
+	strcpy(rule[42].admin, "aDmlN");//헷갈림 방지
+	strcpy(rule[23].admin, "aDMiN");
+	strcpy(rule[24].admin, "aDMIn");
+	strcpy(rule[43].admin, "aDMln");//헷갈림 방지
+	strcpy(rule[25].admin, "AdmIN");
+	strcpy(rule[44].admin, "AdmlN");//헷갈림 방지
+	strcpy(rule[26].admin, "AdMiN");
+	strcpy(rule[27].admin, "AdMIn");
+	strcpy(rule[45].admin, "AdMln");//헷갈림 방지
+	strcpy(rule[28].admin, "ADmiN");
+	strcpy(rule[29].admin, "ADmIn");
+	strcpy(rule[46].admin, "ADmln");//헷갈림 방지
+	strcpy(rule[30].admin, "ADMin");
+	strcpy(rule[31].admin, "ADMIN");
+	strcpy(rule[47].admin, "ADMlN");//헷갈림 방지
+	strcpy(rule[48].admin, "user");
+	strcpy(rule[49].admin, "User");
+	strcpy(rule[50].admin, "uSer");
+	strcpy(rule[51].admin, "usEr");
+	strcpy(rule[52].admin, "useR");
+	strcpy(rule[53].admin, "USer");
+	strcpy(rule[54].admin, "UsEr");
+	strcpy(rule[55].admin, "UseR");
+	strcpy(rule[56].admin, "uSEr");
+	strcpy(rule[57].admin, "uSeR");
+	strcpy(rule[58].admin, "uSER");
+	strcpy(rule[59].admin, "UsER");
+	strcpy(rule[60].admin, "USeR");
+	strcpy(rule[61].admin, "USEr");
+	strcpy(rule[62].admin, "USER");
+	strcpy(rule[63].admin,"usER");//금지 항목에 user 추가.
+	for (int i = 0; i < 64; i++) 
+	{
+		if (strstr(Ld, rule[i].admin)) 
+		{
+			*dp = 1;
+			printf("사용할 수 없는 아이디입니다.\n");
+			break;
+		}
+	}
+	free(rule);
+}

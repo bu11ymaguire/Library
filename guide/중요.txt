@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <conio.h>
+#pragma warning(disable:4996) 
+
+int main()
+{
+	char pw[20];
+	char input[20];
+	for (int i=0;;i++) 
+	{
+		char c;
+		c = getch();
+		if (c == 13) 
+		{
+			pw[i] = '\0';
+			break;
+		}
+		pw[i] = c;
+		putchar('*');
+	}
+	strcpy(input, pw);
+	FILE* fp;
+	fp = fopen("C:\\id\\pratcie.txt", "r");
+	fprintf(fp, "%s", input);
+	fclose(fp);
+	printf("완료.");
+	return 0;
+}

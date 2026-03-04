@@ -1,0 +1,76 @@
+#include "libr.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <conio.h>
+#pragma warning(disable:4996) 
+
+int check_book(char f11e[])  //사용자가 책을 몇권 대여했는지 확인.
+{
+	int n = 0;
+	FILE* cbf;
+	cbf = fopen(f11e, "r");
+	char* get;
+	get = (char*)malloc(sizeof(char) * 200);
+	while (1) 
+	{
+		fgets(get, 200, cbf);
+		if (feof(cbf)) 
+		{
+			break;
+		}
+		n++;
+	}
+	fclose(cbf);
+	free(get);
+	return n;
+}
+
+void b_book(char bok[], char fle[]) //사용자 데이터파일에 책 txt 입력
+{
+	FILE* bb;
+	bb = fopen(fle, "a");
+	fseek(bb, SEEK_END, SEEK_SET);
+	fprintf(bb, "%s\n", bok);
+	fclose(bb);
+}
+
+void user_book(char usr[])
+{
+	char* file;
+	file = (char*)malloc(sizeof(char) * 120);
+	strcpy(file, "C:\\bookuser\\");
+	strcat(file, usr);
+	strcat(file, ".txt");
+	char* book;
+	book = (char*)malloc(sizeof(char) * 70);
+	FILE* ub;
+	ub = fopen(file, "r");
+	if (ub == NULL) 
+	{
+		fprintf(stderr, "%s님은 아직 책을 대여한 적이 없습니다.",usr);
+	}
+	else 
+	{
+		printf("%s님의 대여 목록:",usr);
+		int i = 0;
+		while (1) 
+		{
+			fgets(book, 70, ub);
+			if (feof(ub))
+			{
+				break;
+			}
+			book[strlen(book) - 1] = '\0';
+			printf("%s", book);
+			if (i == 0) {
+				printf(", ");
+			}
+			i++;
+		}
+		fclose(ub);
+	}
+	printf("\n");
+	free(file);
+	free(book);
+}
